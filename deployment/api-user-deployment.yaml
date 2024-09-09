@@ -24,11 +24,13 @@ spec:
           requests:
             memory: 1Gi
             cpu: 0.5
+        ports:
+        - containerPort: 8080
         envFrom:
-        - configMapRef:
-            name: udagram-configmap
-        - secretRef:
-            name: udagram-secrets
         - secretRef:
             name: aws-secret
+        - secretRef:
+            name: udagram-secrets
+        - configMapRef:
+            name: udagram-configmap
       restartPolicy: Always

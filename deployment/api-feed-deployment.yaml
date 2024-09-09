@@ -24,6 +24,8 @@ spec:
           requests:
             memory: 1Gi
             cpu: 0.5
+        ports:
+        - containerPort: 8080
         envFrom:
         - secretRef:
             name: aws-secret
