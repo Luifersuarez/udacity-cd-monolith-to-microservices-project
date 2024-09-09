@@ -1,0 +1,39 @@
+# .circleci/config.yml file
+version: 2.1
+
+jobs:
+  build-and-publish:              # Job name
+    docker:                       # Executor type
+      - image: cimg/base:current  # Base image with Docker, Docker Compose, Git, jq, curl, ssh and more.
+    working_directory: ~/app
+    steps:
+      - checkout
+      - run:
+          name: Generate version
+          command: |
+            echo "Generate version for Udagram app based on the current timestamp"
+            TIMESTAMP=$(date +'%Y-%m-%d_%H-%M')
+            echo "Version $TIMESTAMP"
+            echo "export TAG='$TIMESTAMP'" >> $BASH_ENV
+      - run:
+          name: Build and push Docker image
+          command: |
+            echo "Build the udagram app"
+            docker-compose -f udagram-deployment/docker/docker-compose-build.yaml build --parallel
+
+            echo "Logging to DockerHub"
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+            echo "Pushing images to DockerHub"
+            docker push $DOCKER_USERNAME/reverseproxy:${TAG}
+            docker push $DOCKER_USERNAME/udagram-api-user:${TAG}
+            docker push $DOCKER_USERNAME/udagram-api-feed:${TAG}
+            docker push $DOCKER_USERNAME/udagram-frontend:${TAG}
+            echo "Images successfully pushed to DockerHub"
+
+# Orchestrate jobs using workflows
+workflows:
+  build-and-publish-workflow:
+    # Inside the workflow, you define the jobs you want to run.
+    jobs:
+      - build-and-publish
