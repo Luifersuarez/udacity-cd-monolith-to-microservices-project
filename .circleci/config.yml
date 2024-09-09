@@ -8,8 +8,7 @@ jobs:
     working_directory: ~/app
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.14
+      - setup_remote_docker
       - run:
           name: Generate version
           command: |
@@ -21,16 +20,13 @@ jobs:
           name: Build and push Docker image
           command: |
             echo "Build the udagram app"
-            docker-compose -f docker-compose-build.yaml build --parallel
+            docker compose -f docker-compose-build.yaml build --parallel
 
             echo "Logging to DockerHub"
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
             echo "Pushing images to DockerHub"
-            docker push $DOCKER_USERNAME/reverseproxy:${TAG}
-            docker push $DOCKER_USERNAME/udagram-api-user:${TAG}
-            docker push $DOCKER_USERNAME/udagram-api-feed:${TAG}
-            docker push $DOCKER_USERNAME/udagram-frontend:${TAG}
+            docker compose -f docker-compose-build.yaml push
             echo "Images successfully pushed to DockerHub"
 
 # Orchestrate jobs using workflows
